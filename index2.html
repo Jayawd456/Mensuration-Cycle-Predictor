@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menstruation Cycle Tracker</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .container:hover {
+            transform: scale(1.02);
+        }
+        h2 {
+            color: #e91e63;
+            font-weight: bold;
+        }
+        input, button {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            width: 100%;
+            font-size: 16px;
+        }
+        input {
+            border: 2px solid #e91e63;
+            outline: none;
+        }
+        button {
+            background-color: #e91e63;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #c2185b;
+        }
+        .info-box {
+            font-size: 18px;
+            color: #333;
+            margin-top: 15px;
+            padding: 10px;
+            background: #ffe0e6;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Menstruation Cycle Tracker</h2>
+        <form id="cycleForm">
+            <label for="lastPeriod">Last Period Date:</label>
+            <input type="date" id="lastPeriod" required>
+            <button type="submit">Track Cycle</button>
+        </form>
+        <div class="info-box">
+            <div id="lastSavedDate"></div>
+            <div id="result"></div>
+            <div id="additionalInfo"></div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const cycleForm = document.getElementById("cycleForm");
+            const resultDiv = document.getElementById("result");
+            const lastSavedDateDiv = document.getElementById("lastSavedDate");
+            const additionalInfoDiv = document.getElementById("additionalInfo");
+            
+            const savedDate = localStorage.getItem("lastPeriodDate");
+            if (savedDate) {
+                const lastPeriodDate = new Date(savedDate);
+                const cycleLengths = [27, 28, 30];
+                const randomIndex = Math.floor(Math.random() * cycleLengths.length);
+                const averageCycleLength = cycleLengths[randomIndex];
+                
+                const nextPeriodDate = new Date(lastPeriodDate.getTime());
+                nextPeriodDate.setDate(lastPeriodDate.getDate() + averageCycleLength);
+                
+                localStorage.setItem("lastPeriodDate", nextPeriodDate.toISOString());
+                lastSavedDateDiv.innerHTML = `<p><strong>Last saved period date:</strong> ${nextPeriodDate.toDateString()}</p>`;
+            }
+            
+            cycleForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+                
+                const lastPeriodDate = new Date(document.getElementById("lastPeriod").value);
+                const cycleLengths = [27, 28, 30];
+                const randomIndex = Math.floor(Math.random() * cycleLengths.length);
+                const averageCycleLength = cycleLengths[randomIndex];
+                
+                if (isNaN(lastPeriodDate.getTime())) {
+                    alert("Please enter a valid last period date.");
+                    return;
+                }
+                
+                localStorage.setItem("lastPeriodDate", lastPeriodDate.toISOString());
+                lastSavedDateDiv.innerHTML = `<p><strong>Last saved period date:</strong> ${lastPeriodDate.toDateString()}</p>`;
+                
+                const nextPeriodDate = new Date(lastPeriodDate.getTime());
+                nextPeriodDate.setDate(lastPeriodDate.getDate() + averageCycleLength);
+                
+                resultDiv.innerHTML = `<p><strong>Next period is expected on:</strong> ${nextPeriodDate.toDateString()}</p>`;
+                
+                scheduleAlert(nextPeriodDate);
+                suggestSelfCare();
+            });
+            
+            function scheduleAlert(nextPeriodDate) {
+                const today = new Date();
+                const twoDaysBefore = new Date(nextPeriodDate.getTime());
+                twoDaysBefore.setDate(nextPeriodDate.getDate() - 2);
+                
+                if (today.toDateString() === twoDaysBefore.toDateString()) {
+                    alert("Your period is approaching in 2 days! Prepare accordingly.");
+                    getUserLocation();
+                }
+            }
+            
+            function getUserLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        showLocationOnMap(latitude, longitude);
+                    }, function () {
+                        alert("Unable to retrieve your location.");
+                    });
+                } else {
+                    alert("Geolocation is not supported by this browser.");
+                }
+            }
+            
+            function showLocationOnMap(lat, lng) {
+                window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+            }
+            
+            function suggestSelfCare() {
+                const selfCareTips = [
+                    "Try aromatherapy with lavender to relax.",
+                    "Listen to calming music or practice deep breathing.",
+                    "Use herbal teas like chamomile for soothing effects.",
+                    "Keep a journal to track mood swings and symptoms.",
+                    "Take short walks to improve circulation and mood.",
+                    "Have dark chocolate for a mood boost and magnesium intake.",
+                    "Apply a warm compress to your abdomen for cramp relief.",
+                    "Ensure you get enough vitamin B6 and magnesium for balance."
+                ];
+                const randomSelfCare = selfCareTips[Math.floor(Math.random() * selfCareTips.length)];
+                additionalInfoDiv.innerHTML = `<p><strong>Self-Care Tip:</strong> ${randomSelfCare}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
